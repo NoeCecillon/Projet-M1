@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<reseau>
+	<noeud>
+		<posX>0.5</posX>
+		<posY>0.5</posY>
+		<id>e</id>
+	</noeud>
+	<noeud>
+		<posX>0.1</posX>
+		<posY>0.1</posY>
+		<id>f</id>
+	</noeud>
+	<noeud>
+		<posX>0.8</posX>
+		<posY>0.5</posY>
+		<id>g</id>
+	</noeud>
+	<arc>
+		<depart>e</depart>
+		<arrivee>f</arrivee>
+	</arc>
+	<arc>
+		<depart>e</depart>
+		<arrivee>g</arrivee>
+	</arc>
+	
+</reseau>
