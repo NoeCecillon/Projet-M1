@@ -21,7 +21,7 @@ public class Instance extends mxGraph {
 	
 	HashMap<Integer, Noeud> noeuds;
 	ArrayList<Arc> arcs;
-	ArrayList<Arc> sousReseau;
+	HashMap<String, ResultatInstance> resultats;
 	HashMap<Integer, Commodite> commodites;
 	
 	private boolean reseauBaseAffiche = true;
@@ -33,9 +33,13 @@ public class Instance extends mxGraph {
 	private FenetrePrincipale fenetrePrincipale;
 	/* Coeddicient de zoom. 1 = zoom de base*/
 	private int zoom = 1;
+	/* Nom de la méthode qui est sélectionnée */
+	private String selectedMethod;
+	/* Référence vers la fenêtre contenant les informations affichées sur les commodités */
+	private FenetreInfos fenetreInfosCommodity;
 	
 	public Instance(boolean reelle, String path) {
-		
+		this.resultats = new HashMap<String, ResultatInstance>();
 		this.path = path;
 	/* Si le paramètre est true, on crée une instance réelle sinon une instance aléatoire */	
 		if (reelle) {
@@ -299,7 +303,7 @@ public class Instance extends mxGraph {
 			getModel().endUpdate();
 		}
 		
-		/* Lecture des commodités das le fichier */
+		/* Lecture des commodités dans le fichier */
 		
 		this.commodites = new HashMap<Integer, Commodite>();
 		File fichier = new File(path+System.getProperty("file.separator")+"fichier_3.csv");
@@ -330,10 +334,23 @@ public class Instance extends mxGraph {
 	}
 	
 	/* Méthode lançant l'éxécution du modèle Julia pour récupérer les résultats */
-	public void calculSolution(FenetrePrincipale fenetrePrincipale) {
+	public void calculSolution(FenetrePrincipale fenetrePrincipale, String cheminMethode) {
+		//si ce n'est pas la première résolution, on remet l'affichage comme il est au lancement de l'application avant de calculer
+		if (this.selectedMethod != null) {
+			//affiche uniquement le réseau de base
+			if (this.fenetreInfosCommodity!=null) {
+				afficheCommodity(0, this.fenetreInfosCommodity);
+				//remet les controles comme il faut (réseau base activé, sous réseau désactivé et commodité sur 0)
+				this.fenetreInfosCommodity.haut.resetControls();
+			}
+			afficherReseauBase();
+			cacherReseauSelectionne();
+		}
+		//on stocke le nom du modèle sélectionné
+		this.selectedMethod = new File(cheminMethode).getName().replace(".jl", "");
 		this.fenetrePrincipale = fenetrePrincipale;
 		/* Julia est éxécuté dans un thread séparé */
-		ThreadJulia t = new ThreadJulia(path, this);
+		ThreadJulia t = new ThreadJulia(path, this, cheminMethode);
 		t.start();
 		/* Affichage de la progressbar de chargement */
 		//doit forcément être après le start du thread
@@ -343,8 +360,10 @@ public class Instance extends mxGraph {
 	
 	/* Lit les résultats dans le texte fourni en sortie par Julia */
 	public void lectureResultats(String result) {
+		//on crée un nouveau résultat ou on remplace celui qui était dans la map 
+		resultats.put(selectedMethod, new ResultatInstance());
+		
 		String []lignes = result.split(System.getProperty("line.separator"));
-		this.sousReseau = new ArrayList<Arc>();
 		int numCommodity = 0;
 		
 		for(int i=0; i<lignes.length; i++) {
@@ -361,7 +380,8 @@ public class Instance extends mxGraph {
 					for(int k=0; k<arcs.size(); k++) {
 						Arc a = arcs.get(k);
 						if((a.origine == Integer.parseInt(sommets[0]) && a.destination == Integer.parseInt(sommets[1])) || (a.origine == Integer.parseInt(sommets[1]) && a.destination == Integer.parseInt(sommets[0]))) {
-							this.sousReseau.add(a);
+							//rajoute l'arc à la liste d'arcs sélectionnés du résultat
+							this.resultats.get(this.selectedMethod).ajouterSousReseau(a);
 						}
 					}
 				}
@@ -375,24 +395,28 @@ public class Instance extends mxGraph {
 				//récupère le num de la commodité
 				numCommodity = Integer.parseInt(mots[1]);
 				if (this.commodites.get(numCommodity) != null) {
+					/* On crée une nouvelle commoditeResultat */
+					this.resultats.get(selectedMethod).ajouterCommodite(numCommodity, new CommoditeResultat(this.commodites.get(numCommodity).depart, this.commodites.get(numCommodity).arrivee));
+					/* On récupère tous les arcs qui sont écrits */
 					for (int j=3; j<mots.length; j++) {
 						String s = mots[j].replaceAll("[()]", "");
 						String[] sommets = s.split(",");
-						/* On ajoute les arcs utilisés dans l'objet commodite */
-						this.commodites.get(numCommodity).addArc(new Arc(Integer.parseInt(sommets[0]),Integer.parseInt(sommets[1])));
+						/* On récupère la commoditeResultat qu'on vient de créer et on y ajoute l'arc */
+						this.resultats.get(selectedMethod).commodites.get(numCommodity).addArc(new Arc(Integer.parseInt(sommets[0]),Integer.parseInt(sommets[1])));
 					}	
 				}
 			}
 			/* Récupère la longueur des commodités */
 			if (lignes[i].startsWith("length : ")) {
 				String mot = lignes[i].replace("length : ", ""); 
-				this.commodites.get(numCommodity).length = Double.parseDouble(mot);
+				//rajoute la longueur de la commodité
+				this.resultats.get(selectedMethod).commodites.get(numCommodity).length = Double.parseDouble(mot);
 			}
 		}
 		/* On ordonne les arcs dans toutes les commodités */
-		Iterator<HashMap.Entry<Integer, Commodite>> iterateur = commodites.entrySet().iterator();
+		Iterator<HashMap.Entry<Integer, CommoditeResultat>> iterateur = this.resultats.get(selectedMethod).commodites.entrySet().iterator();
     	while(iterateur.hasNext()) {
-    		HashMap.Entry<Integer, Commodite> entry = iterateur.next();	  
+    		HashMap.Entry<Integer, CommoditeResultat> entry = iterateur.next();	  
     		entry.getValue().ordonnerArcs();
     	}
     	/* Une fois que tous les résultats sont récupérés on active les boutons de la fenetre infos */
@@ -401,8 +425,10 @@ public class Instance extends mxGraph {
 		this.fenetrePrincipale.finChargement();
 		/* Affichage de la sortie de julia dans la console */
 		FenetreConsole.getFenetreConsole().printSimplex(result);
+				
 	}
 
+	
 	/* Replace les noeuds quand la fenêtre est redimensionnée */
 	public void replacerNoeuds(int width, int height) {
 		/* Parcours de tous les noeuds */
@@ -435,7 +461,7 @@ public class Instance extends mxGraph {
 		for(int i=0; i<arcs.size(); i++) {
 			Arc arc = arcs.get(i);
 			/* Vérifie comment l'affichage doit être modifié */
-			if((!sousReseauAffiche || !sousReseau.contains(arc)) && (commoditeAffichee == 0 || !commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
+			if((!sousReseauAffiche || !resultats.get(selectedMethod).sousReseauContient(arc)) && (commoditeAffichee == 0 || !this.resultats.get(selectedMethod).commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
 				/* Dans ce cas on doit afficher l'arc comme faisant partie du réseau de base */
 				arc.arc.setVisible(true);
 				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=1;");
@@ -450,7 +476,7 @@ public class Instance extends mxGraph {
 		for(int i=0; i<arcs.size(); i++) {
 			Arc arc = arcs.get(i);
 			/* Vérifie comment l'affichage doit être modifié */
-			if((!sousReseauAffiche || !sousReseau.contains(arc)) && (commoditeAffichee == 0 || !commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
+			if((!sousReseauAffiche || !resultats.get(selectedMethod).sousReseauContient(arc)) && (commoditeAffichee == 0 || !this.resultats.get(selectedMethod).commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
 				/* Dans ce cas on cache l'arc */
 				arc.arc.setVisible(false);
 				refresh();
@@ -468,7 +494,7 @@ public class Instance extends mxGraph {
 		for(int i=0; i<arcs.size(); i++) {
 			Arc arc = arcs.get(i);
 			/* Vérifie comment l'affichage doit être modifié */
-			if(sousReseau.contains(arc) && (commoditeAffichee == 0 || !commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
+			if(resultats.get(selectedMethod).sousReseauContient(arc) && (commoditeAffichee == 0 || !this.resultats.get(selectedMethod).commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
 				/* Dans ce cas on doit afficher l'arc comme faisant partie du sous réseau */
 				arc.arc.setVisible(true);
 				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=0;");
@@ -483,7 +509,7 @@ public class Instance extends mxGraph {
 		for(int i=0; i<arcs.size(); i++) {
 			Arc arc = arcs.get(i);
 			/* Vérifie comment l'affichage doit être modifié */
-			if(sousReseau.contains(arc) && (commoditeAffichee == 0 || !commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
+			if(resultats.get(selectedMethod).sousReseauContient(arc) && (commoditeAffichee == 0 || !this.resultats.get(selectedMethod).commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
 				/* Dans ce cas on doit cacher l'arc */
 				arc.arc.setVisible(false);
 				refresh();
@@ -496,10 +522,14 @@ public class Instance extends mxGraph {
 	}
 	
 	public void afficheCommodity(int idComm, FenetreInfos conteneur) {
+		//afficher la commodité 0 permet d'effacer celle qui est affichée sans en afficher une nouvelle.
+		/* On supprime les infos affichées */
+		conteneur.getBas().vider();
+		conteneur.getBas().repaint();
 		
 		/* Si une commodité est déjà affichée on la supprime avant d'afficher l'autre */
 		if (commoditeAffichee != 0) {
-			Commodite c = commodites.get(commoditeAffichee);
+			CommoditeResultat c = this.resultats.get(selectedMethod).commodites.get(commoditeAffichee);
 			for(int i=0; i<c.arcsUtilises.size(); i++) {
 				Arc arc = c.arcsUtilises.get(i);
 				/* On supprime l'arc qui était affiché */
@@ -509,7 +539,7 @@ public class Instance extends mxGraph {
 		commoditeAffichee = idComm;
 		/* Si idComm vaut 0 c'est qu'on ne doit pas afficher de commodité */
 		if(commoditeAffichee != 0) {		
-			Commodite c = commodites.get(idComm);
+			CommoditeResultat c = this.resultats.get(selectedMethod).commodites.get(idComm);
 			FenetreConsole.getFenetreConsole().printConsole("Commodity "+idComm+" : "+c.depart+" -> "+c.arrivee);
 			for(int i=0; i<c.arcsUtilises.size(); i++) {
 				/* On crée un nouvel arc et on l'ajoute au modèle */
@@ -524,6 +554,7 @@ public class Instance extends mxGraph {
 			}
 			
 			/* Affichage des infos sur la commodité sélectionnée */
+			this.fenetreInfosCommodity = conteneur;
 			conteneur.getBas().vider();
 			conteneur.getBas().ajouter(new JLabel("Commodity "+idComm+ " : " + c.depart + "->" +c.arrivee));
 			conteneur.getBas().ajouter(new JLabel("Length : "+c.length));
@@ -599,4 +630,21 @@ public class Instance extends mxGraph {
 			}
 		}
 	}
+	
+	/* Permet de modifier le résultat qui est affiché. Prend en paramètre le nom de la méthode dont les résultats doivent être affichés. */
+	public void setMethodeSelectionnee(String methode) {
+		// On remet l'affichage de base
+		if (this.selectedMethod != null) {
+			//affiche uniquement le réseau de base
+			afficherReseauBase();
+			cacherReseauSelectionne();
+			if (this.fenetreInfosCommodity!=null) {
+				afficheCommodity(0, this.fenetreInfosCommodity);
+				//remet les controles comme il faut (réseau base activé, sous réseau désactivé et commodité sur 0)
+				this.fenetreInfosCommodity.haut.resetControls();
+			}
+		}
+		this.selectedMethod = methode;
+	}
+	
 }

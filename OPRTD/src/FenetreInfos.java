@@ -15,7 +15,6 @@ public class FenetreInfos extends JSplitPane {
 		add(this.haut, JSplitPane.TOP);
 		this.bas = new FenetreInfosBas();		
 		add(this.bas, JSplitPane.BOTTOM);
-		
 	}
 	
 	public FenetreInfosBas getBas() {

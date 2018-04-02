@@ -113,9 +113,9 @@ public class FenetrePrincipale extends JFrame {
 		revalidate();		
 	}
 	
-	/* Quand l'utilisateur demande de résoudre l'instance on lance le calcul de la solution */
-	public void resoudre() {
-		this.fenetreCentre.getInstance().calculSolution(this);
+	/* Quand l'utilisateur demande de résoudre l'instance on lance le calcul de la solution en lui donnant le chemin vers le fichier de la méthode à utiliser */
+	public void resoudre(String cheminMethode) {
+		this.fenetreCentre.getInstance().calculSolution(this, cheminMethode);
 	}
 	
 	public FenetreConsole getFenetreLog() {

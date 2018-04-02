@@ -137,47 +137,29 @@ public class menuBar extends JMenuBar {
 		});
 		menuInstance.add(itemSave);
 		
-		/* Bouton pour lancer la résolution */
-		JMenuItem itemSolve = new JMenuItem("Solve");
-		itemSolve.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				parent.resoudre();
-			}
-		});
-		menuInstance.add(itemSolve);
 		
-		
-		
-		JRadioButtonMenuItem rdbtnmntmMthode = new JRadioButtonMenuItem("Method 1");
-		menuMethode.add(rdbtnmntmMthode);
-		
-		JRadioButtonMenuItem rdbtnmntmMthode_1 = new JRadioButtonMenuItem("Method 2");
-		rdbtnmntmMthode_1.setSelected(true);
-		menuMethode.add(rdbtnmntmMthode_1);
-		
-		JRadioButtonMenuItem rdbtnmntmMthode_2 = new JRadioButtonMenuItem("Method 3");
-		menuMethode.add(rdbtnmntmMthode_2);
-		
-		JMenu mnComparatif = new JMenu("Comparatif");
-		menuMethode.add(mnComparatif);
-		
-		JCheckBoxMenuItem chckbxmntmMthode = new JCheckBoxMenuItem("Method 1");
-		chckbxmntmMthode.setSelected(true);
-		mnComparatif.add(chckbxmntmMthode);
-		
-		JCheckBoxMenuItem chckbxmntmMthode_1 = new JCheckBoxMenuItem("Method 2");
-		mnComparatif.add(chckbxmntmMthode_1);
-		
-		JCheckBoxMenuItem chckbxmntmMthode_2 = new JCheckBoxMenuItem("Method 3");
-		chckbxmntmMthode_2.setSelected(true);
-		mnComparatif.add(chckbxmntmMthode_2);
+		/* Crée les items pour les méthodes dans le menu correspondant.
+		 * On récupère le nom de chaque fichier méthode dans le dossier methods et on l'affiche comme texte de l'item.
+		 */		
+		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
+		for (String nomMethode : fichiers){
+			String nom = nomMethode.replace(".jl", "");
+			JRadioButtonMenuItem nouvelItem = new JRadioButtonMenuItem(nom);
+			//au clic sur l'item, on lance la résolution en donnant le chemin vers le fichier de la méthode en paramètre
+			nouvelItem.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					parent.resoudre("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+nomMethode);
+					String nomM = nom;
+					parent.getFenetreInfos().haut.addMethode(nomM);
+				}
+			});
+			menuMethode.add(nouvelItem);
+		}
 		
 		JMenuItem mntmAjouter = new JMenuItem("Ajouter");
 		menuMethode.add(mntmAjouter);
-		
-		
-		
+				
 		
 		JMenuItem mntmStatistiques = new JMenuItem("Statistiques");
 		menuSolution.add(mntmStatistiques);

@@ -1,18 +1,14 @@
-
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-
+import java.io.File;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -27,6 +23,7 @@ public class FenetreInfosHaut extends JPanel {
 	private FenetreInfos parent;
 	private JButton zoomIn;
 	private JButton zoomOut;
+	private JComboBox choixMethode;
 	
 	public Box box;
 	
@@ -62,6 +59,25 @@ public class FenetreInfosHaut extends JPanel {
 		});
 		box.add(Hbox);
 		
+		/* Crée la combobox permettant de choisir les résultats de quelle méthode on veut afficher. 
+		 * Toutes les méthodes sont affichées et celles n'ayant pas été pour résoudre le problème ne peuvent pas être cliquées.
+		 * */		
+		choixMethode = new JComboBox();
+		//on récupère le nom des méthodes dans le dossier methods
+		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
+		for (String nomMethode : fichiers){
+			String nom = nomMethode.replace(".jl", "");
+			//choixMethode.addItem(nom);
+		}
+		//Au clic on modifie la méthode sélectionnée dans l'instance
+		choixMethode.addActionListener (new ActionListener () {
+		    public void actionPerformed(ActionEvent e) {
+		    	instance.setMethodeSelectionnee(choixMethode.getSelectedItem().toString());
+		    }
+		});
+		box.add(choixMethode);		
+		
+		// checkbox pour afficher ou non le réseau de base
 		cbReseau = new JCheckBox("Réseau base");
 		cbReseau.setSelected(true);
 		/* affiche ou cache le réseau de base */
@@ -75,6 +91,7 @@ public class FenetreInfosHaut extends JPanel {
 		      }
 		});
 		
+		// checkbox pour afficher ou non le sous réseau sélectionné
 		cbSelect = new JCheckBox("Réseau sélectionné");
 		/* Affiche ou cache le sous reseau selectionne */
 		cbSelect.addItemListener(new ItemListener() {
@@ -90,7 +107,7 @@ public class FenetreInfosHaut extends JPanel {
 		box.add(cbReseau);
 		box.add(cbSelect);
 		
-		
+		//Permet de sélectionner la commodité à afficher
 		choixCommodite = new JComboBox();
 		choixCommodite.addItem("-----");
 		for (int i=0; i<instance.commodites.size(); i++) {
@@ -104,7 +121,7 @@ public class FenetreInfosHaut extends JPanel {
 		    	}
 		    	/* Si on a sélectionné la première case, on efface toutes les commodités */
 		    	else {
-		    		instance.afficheCommodity(0, null);
+		    		instance.afficheCommodity(0, parent);
 		    	}
 		    }
 		});
@@ -124,6 +141,7 @@ public class FenetreInfosHaut extends JPanel {
 		this.choixCommodite.setEnabled(true);
 		this.zoomIn.setEnabled(true);
 		this.zoomOut.setEnabled(true);
+		this.choixMethode.setEnabled(true);
 	}
 	
 	/* Désactive les controles */
@@ -133,5 +151,18 @@ public class FenetreInfosHaut extends JPanel {
 		this.choixCommodite.setEnabled(false);
 		this.zoomIn.setEnabled(false);
 		this.zoomOut.setEnabled(false);
+		this.choixMethode.setEnabled(false);
+	}
+	
+	/* Remet les boutons comme ils sont à l'ouverture de l'application */
+	public void resetControls() {
+		this.cbReseau.setSelected(true);
+		this.cbSelect.setSelected(false);
+		this.choixCommodite.setSelectedIndex(0);
+	}
+	
+	/* Permet d'ajouter un item dans la combobox des méthodes */
+	public void addMethode(String methode) {
+		this.choixMethode.addItem(methode);
 	}
 }

@@ -1,22 +1,25 @@
-import java.awt.Window;
+import java.io.File;
 import java.io.IOException;
 
 public class ThreadJulia extends Thread {
 
 	String path;
 	Instance parent;
+	String cheminMethode;
 	
-	public ThreadJulia(String path, Instance parent) {
+	public ThreadJulia(String path, Instance parent, String cheminMethode) {
 		this.path = path;
 		this.parent = parent;
+		// On récupère le chemin complet vers le fichier de la méthode
+		File f = new File(cheminMethode);
+		this.cheminMethode = f.getAbsolutePath();
 	}
 	
     public void run(){
     	Runtime runtime = Runtime.getRuntime();
 		Process proc;
 		try {
-			proc = runtime.exec(new String[] { "C:\\Users\\Jean\\AppData\\Local\\Julia-0.5.2\\bin\\julia.exe", "--depwarn=no" , "C:\\Users\\Jean\\AppData\\Local\\Julia-0.5.2\\ProjetM1\\belman.jl" , path+System.getProperty("file.separator")} );
-			System.out.println(path+System.getProperty("file.separator"));
+			proc = runtime.exec(new String[] { "C:\\Users\\Jean\\AppData\\Local\\Julia-0.5.2\\bin\\julia.exe", "--depwarn=no" , cheminMethode , path+System.getProperty("file.separator")} );
 			System.out.println("Attente ... ");
 			/* Récupère ce qui est écrit dans la console de Julia */
 			AfficheurFluxJulia fluxSortie = new AfficheurFluxJulia(proc.getInputStream());
