@@ -1,6 +1,10 @@
+package infos;
+
 import java.awt.BorderLayout;
 
 import javax.swing.JSplitPane;
+
+import affichageCentral.Instance;
 
 public class FenetreInfos extends JSplitPane {
 	
@@ -19,6 +23,10 @@ public class FenetreInfos extends JSplitPane {
 	
 	public FenetreInfosBas getBas() {
 		return this.bas;
+	}
+	
+	public FenetreInfosHaut getHaut() {
+		return this.haut;
 	}
 	
 	/* Désactive les controles */

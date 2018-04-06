@@ -1,6 +1,9 @@
+package barreMenu;
 import java.io.IOException;
 
+import affichageCentral.AfficheurFluxJulia;
 import logs.FenetreConsole;
+import main.FenetrePrincipale;
 
 public class ThreadGeneration extends Thread {
 

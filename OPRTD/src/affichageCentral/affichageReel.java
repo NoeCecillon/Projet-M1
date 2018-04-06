@@ -1,3 +1,4 @@
+package affichageCentral;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -9,23 +10,26 @@ import com.mxgraph.swing.mxGraphComponent;
 
 public class affichageReel extends PanelCentre {
 	
+	// L'instance qui doit être traitée.
 	Instance instance;
-	mxGraphComponent comp;
 	
+	/**
+	 * Construit un affichage réel. Instancie les objets et ajoute le mxGraphComponent au panel pour l'afficher.
+	 * @param path Chemin vers le dossier contenant les fichiers de l'instance à traiter.
+	 */
 	public affichageReel(String path) {
-
 		setPreferredSize(new Dimension(100,100));
-		setLayout(new BorderLayout());
-		
+		setLayout(new BorderLayout());	
 		this.instance = new Instance(true, path);		  		 
-		this.comp = new mxGraphComponent(instance);		  
-		
+		this.comp = new mxGraphComponent(instance);		  		
 		add(comp, BorderLayout.CENTER);
-		
+		//Met en place le listener pour redimensionner la carte au redimensionnement de la fenêtre.
 		redimensionnementAuto();		  	  
 	}
 	
-	/* Listener pour replacer les noeuds au redimensionnement de la fenêtre */
+	/**
+	 *  Listener pour replacer les noeuds au redimensionnement de la fenêtre 
+	 */
 	public void redimensionnementAuto() {
 		this.comp.addComponentListener(new ComponentAdapter() {
             @Override
@@ -36,6 +40,10 @@ public class affichageReel extends PanelCentre {
         });
 	}
 	
+	/**
+	 * Getter de l'instance.
+	 * @return L'instance traitée.
+	 */
 	public Instance getInstance() {
 		return this.instance;
 	}

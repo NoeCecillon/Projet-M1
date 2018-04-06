@@ -1,3 +1,4 @@
+package barreMenu;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -14,6 +15,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
+
+import main.FenetrePrincipale;
 
 public class menuBar extends JMenuBar {
 
@@ -151,7 +154,7 @@ public class menuBar extends JMenuBar {
 				public void mouseReleased(MouseEvent arg0) {
 					parent.resoudre("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+nomMethode);
 					String nomM = nom;
-					parent.getFenetreInfos().haut.addMethode(nomM);
+					parent.getFenetreInfos().getHaut().addMethode(nomM);
 				}
 			});
 			menuMethode.add(nouvelItem);

@@ -1,4 +1,4 @@
-import java.awt.Dimension;
+package main;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -10,6 +10,12 @@ import javax.swing.JProgressBar;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import affichageCentral.PanelCentre;
+import affichageCentral.affichageRandom;
+import affichageCentral.affichageReel;
+import barreMenu.FenetreGeneration;
+import barreMenu.menuBar;
+import infos.FenetreInfos;
 import logs.FenetreConsole;
 
 public class FenetrePrincipale extends JFrame {
