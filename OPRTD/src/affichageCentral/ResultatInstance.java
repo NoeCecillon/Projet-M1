@@ -12,6 +12,10 @@ public class ResultatInstance {
 	ArrayList<Arc> sousReseau;
 	//Résultats pour chaque commodité de l'instance.
 	HashMap<Integer, CommoditeResultat> commodites;
+	//Temps de résolution en secondes
+	public float tempsResolution;
+	//Valeur de la fonction objectif
+	public String valeurObjectif;
 	
 	/**
 	 * Constructeur

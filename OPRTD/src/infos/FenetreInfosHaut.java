@@ -38,7 +38,7 @@ public class FenetreInfosHaut extends JPanel {
 		this.box = Box.createVerticalBox();
 		
 		/* Ajout des boutons pour zoomer sur le graphe */
-		JLabel textZoom = new JLabel("Zoom");
+		JLabel textZoom = new JLabel("Zoom carte ");
 		this.zoomIn = new JButton("+");
 		this.zoomOut = new JButton("-");
 		// on met les 3 éléments dans une HBox pour qu'ils soient sur une seule ligne
@@ -63,14 +63,12 @@ public class FenetreInfosHaut extends JPanel {
 		box.add(Hbox);
 		
 		/* Crée la combobox permettant de choisir les résultats de quelle méthode on veut afficher. 
-		 * Toutes les méthodes sont affichées et celles n'ayant pas été pour résoudre le problème ne peuvent pas être cliquées.
 		 * */		
 		choixMethode = new JComboBox();
 		//on récupère le nom des méthodes dans le dossier methods
 		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
 		for (String nomMethode : fichiers){
 			String nom = nomMethode.replace(".jl", "");
-			//choixMethode.addItem(nom);
 		}
 		//Au clic on modifie la méthode sélectionnée dans l'instance
 		choixMethode.addActionListener (new ActionListener () {

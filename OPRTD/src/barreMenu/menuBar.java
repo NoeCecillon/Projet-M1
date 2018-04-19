@@ -1,20 +1,29 @@
 package barreMenu;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingConstants;
 
 import main.FenetrePrincipale;
 
@@ -28,8 +37,6 @@ public class menuBar extends JMenuBar {
 		add(menuInstance);
 		JMenu menuMethode = new JMenu("Method");
 		add(menuMethode);
-		JMenu menuSolution = new JMenu("Solution");
-		add(menuSolution);
 		JMenu menuAide = new JMenu("Help");
 		add(menuAide);
 				
@@ -147,25 +154,53 @@ public class menuBar extends JMenuBar {
 		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
 		for (String nomMethode : fichiers){
 			String nom = nomMethode.replace(".jl", "");
-			JRadioButtonMenuItem nouvelItem = new JRadioButtonMenuItem(nom);
+			JMenuItem nouvelItem = new JMenuItem(nom);
 			//au clic sur l'item, on lance la résolution en donnant le chemin vers le fichier de la méthode en paramètre
 			nouvelItem.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseReleased(MouseEvent arg0) {
 					parent.resoudre("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+nomMethode);
+					// Ajoute la méthode dans les listes sur les fenetres infos à droite
 					String nomM = nom;
 					parent.getFenetreInfos().getHaut().addMethode(nomM);
+					parent.getFenetreInfos().getComparaison().addMethode(nomM);
 				}
 			});
 			menuMethode.add(nouvelItem);
 		}
 		
-		JMenuItem mntmAjouter = new JMenuItem("Ajouter");
-		menuMethode.add(mntmAjouter);
-				
+		// Item permettant d'ajouter une nouvelle méthode de résolution.
+		JMenuItem ajouterMethode = new JMenuItem("Ajouter");
 		
-		JMenuItem mntmStatistiques = new JMenuItem("Statistiques");
-		menuSolution.add(mntmStatistiques);
+		ajouterMethode.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				//Texte d'aide qui sera affiché dans le fileChooser. String générée avec https://codebeautify.org/java-escape-unescape pour transformer un texte normal en un texte utilisable dans une String.
+				String texteAide = "Pour ajouter une nouvelle méthode de résolution, sélectionnez le fichier contenant la méthode.\nLe fichier doit être au format .jl et son nom doit être celui que vous voulez utiliser comme nom de la méthode.\nPour pouvoir être utilisé, le fichier doit respecter les conditions suivantes :\n\t- En début de fichier, juste après les \"using XXX\", il faut ajouter la ligne suivante \"File=string(ARGS[1])\".\n\t- Les chemins vers les fichiers fichier_1.csv, fichier_2.csv et fichier_3.csv doivent être remplacés par \'File*\"fichier_3.csv\"\'.\n\t- Le sous réseau sélectionné doit être affiché en commençant par \"subgraph :\" puis avec tous les arcs sous la forme  (27,20)   (57,27)   (58,57)   (64,50) ...\n\t- Le résultat des commodités doit être affiché en commençant par \"commodity X :\" ou X est le numéro de la commodité et suivi des sommets utilisés par cette commodité sous la forme commodity 1 :    (77,79)   (79,111)   (80,77) ...\n\t- La ligne suivant doit contenir la longueur de la commodité sous la forme \"length : 3203.966569\"";
+				//Ouvre le sélecteur de fichier contenant un bouton aide. On donne le texte d'aide au constructeur.
+				CustomFileChooser choix = new CustomFileChooser(texteAide);
+				int retour = choix.showOpenDialog(parent.getContentPane());
+				//Si l'utilisateur a sélectionné un fichier
+				if(retour==JFileChooser.APPROVE_OPTION){
+					//Vérifie que c'est bien un fichier .jl
+					if (choix.getSelectedFile().getName().contains(".jl")) {
+						//Pour copier le fichier on doit utiliser des Path contenant l'adresse des dossiers source et destination.
+						Path src = choix.getSelectedFile().toPath();
+						//La destination doit être le nouveau chemin vers le fichier
+						Path dest = new File("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+choix.getSelectedFile().getName()).toPath();
+						try {
+							Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+							//On recrée la menuBar pour ajouter la nouvelle méthode de résolution.
+							parent.reconstruireMenuBar();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					
+				}
+			}
+		});
+		menuMethode.add(ajouterMethode);
 		
 	}
 	
@@ -204,6 +239,6 @@ public class menuBar extends JMenuBar {
 			}			
 		} catch (Exception e){
 			e.printStackTrace();
-		}
+		}			
 	}
 }

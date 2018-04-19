@@ -31,7 +31,7 @@ public class Instance extends mxGraph {
 	// Liste de tous les arcs dans l'instance.
 	ArrayList<Arc> arcs;
 	// Tous les résultats de cette instance indéxés par le nom de la méthode de résolution utilisée pour obtenir ces résultats.
-	HashMap<String, ResultatInstance> resultats;
+	public HashMap<String, ResultatInstance> resultats;
 	// Toutes les commodités qu'il y a dans l'instance indéxées par leur ID (l'ID est récupéré dans la sortie de Julia : 0,1,2,...)
 	HashMap<Integer, Commodite> commodites;
 	// Booléens pour savoir ce qui est affichée en ce moment sur la carte.
@@ -111,7 +111,7 @@ public class Instance extends mxGraph {
 	        			noeuds.put(arrivee, new Noeud(cell));
 	        		}
 	        		// Maintenant qu'on a créé les noeuds on ajoute l'arc entre ces 2 noeuds.
-	        		Object arc = insertEdge(getDefaultParent(), null, null, noeuds.get(depart).node, noeuds.get(arrivee).node, "endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=1;");
+	        		Object arc = insertEdge(getDefaultParent(), null, null, noeuds.get(depart).node, noeuds.get(arrivee).node, "endArrow=none;strokeColor=#acadaf;strokeWidth=1;dashed=1;");
 	        		//ajout dans la liste
 	        		arcs.add(new Arc(depart, arrivee, (mxCell) arc));
 	        	} catch (NumberFormatException e) {}	        	
@@ -294,7 +294,7 @@ public class Instance extends mxGraph {
 	        			noeuds.put(arrivee, new Noeud(cell));
 	        		}
 	        		// Maintenant qu'on a créé les noeuds on ajoute l'arc entre ces 2 noeuds.
-	        		Object arc = insertEdge(getDefaultParent(), null, null, noeuds.get(depart).node, noeuds.get(arrivee).node, "endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=1;");
+	        		Object arc = insertEdge(getDefaultParent(), null, null, noeuds.get(depart).node, noeuds.get(arrivee).node, "endArrow=none;strokeColor=#acadaf;strokeWidth=1;dashed=1;");
 	        		//ajout dans la liste
 	        		arcs.add(new Arc(depart, arrivee, (mxCell) arc));
 	        	} catch (NumberFormatException e) {}	        	
@@ -497,6 +497,20 @@ public class Instance extends mxGraph {
 				//rajoute la longueur de la commodité
 				this.resultats.get(selectedMethod).commodites.get(numCommodity).length = Double.parseDouble(mot);
 			}
+			// Récupère le temps de résolution
+			if (lignes[i].startsWith("Solved in ")) {
+				String[] mots = lignes[i].split(" "); 
+				//stocke le temps de résolution
+				this.resultats.get(selectedMethod).tempsResolution = Float.parseFloat(mots[5]);
+			}
+			//Récupère la valeur de la fonction objectif
+			//IL y a 2 espaces à la fin sinon on récupère la mauvaise ligne
+			if (lignes[i].startsWith("Optimal objective  ")) {
+				String[] mots = lignes[i].split(" "); 
+				//stocke le temps de résolution
+				this.resultats.get(selectedMethod).valeurObjectif = mots[3];
+			}
+
 		}
 		/* On ordonne les arcs dans toutes les commodités */
 		Iterator<HashMap.Entry<Integer, CommoditeResultat>> iterateur = this.resultats.get(selectedMethod).commodites.entrySet().iterator();
@@ -551,10 +565,12 @@ public class Instance extends mxGraph {
 				/* Dans ce cas on doit afficher l'arc comme faisant partie du réseau de base */
 				arc.arc.setVisible(true);
 				// style de l'arc (pas de flèche, trait large et pointillés
-				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=1;");
+				arc.arc.setStyle("endArrow=none;strokeColor=#acadaf;strokeWidth=1;dashed=1;");
 				refresh();
 			}
 		}
+		// On réajuste la taille
+		adapterTailleGraphe();
 	}
 	
 	/**
@@ -588,10 +604,12 @@ public class Instance extends mxGraph {
 			if(resultats.get(selectedMethod).sousReseauContient(arc) && (commoditeAffichee == 0 || !this.resultats.get(selectedMethod).commodites.get(commoditeAffichee).arcsUtilises.contains(arc))) {
 				/* Dans ce cas on doit afficher l'arc comme faisant partie du sous réseau */
 				arc.arc.setVisible(true);
-				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=2;dashed=0;");
+				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=1;dashed=0;");
 				refresh();
 			}
 		}
+		// On réajuste la taille
+		adapterTailleGraphe();
 	}
 	
 	/**
@@ -651,7 +669,7 @@ public class Instance extends mxGraph {
 				mxCell arcCree = (mxCell) a;
 				arc.arc = arcCree;
 				// Le nouvel arc que l'on ajoute est rouge et est orienté
-				arcCree.setStyle("strokeColor=#ce103c;strokeWidth=2;dashed=0;");
+				arcCree.setStyle("strokeColor=#ce103c;strokeWidth=1;dashed=0;");
 				refresh();	
 			}
 			
@@ -662,6 +680,8 @@ public class Instance extends mxGraph {
 			conteneur.getBas().ajouter(new JLabel("Length : "+c.length));
 			conteneur.getBas().revalidate();
 		}
+		// On réajuste la taille
+		adapterTailleGraphe();
 	}
 	
 	/**
@@ -676,14 +696,6 @@ public class Instance extends mxGraph {
 	 * Méthode appelée après la création de l'affichage permettant d'adapter le style à la densité du graphe.
 	 */
 	public void adapterTailleGraphe() {
-		/* Si il y a plus de 15 arcs on passe la width a 1 au lieu de 2 */
-		if (arcs.size() > 35) {
-			for(int i=0; i<arcs.size(); i++) {
-				Arc arc = arcs.get(i);
-				arc.arc.setStyle("endArrow=none;strokeColor=#42bc5a;strokeWidth=1;dashed=1;");
-				refresh();
-			}
-		}
 		/* Modifie la taille des noeuds en fonction du nombre de noeuds */
 		if (noeuds.size() > 100) {
 			Iterator<HashMap.Entry<Integer, Noeud>> itr = noeuds.entrySet().iterator();
@@ -749,21 +761,39 @@ public class Instance extends mxGraph {
 	/**
 	 * Permet de modifier le résultat qui est affiché. 
 	 * Prend en paramètre le nom de la méthode dont les résultats doivent être affichés.
+	 * Quand on change la méthode de résolution sélectionnée, les paramètres d'affichage qui étaient sélectionnés sont conservés 
+	 * pour permettre de voir plus facilement les différences de résultats entre 2 méthodes de résolution.
 	 * @param methode La méthode de résolution que l'on veut sélectionner.
 	 */
 	public void setMethodeSelectionnee(String methode) {
-		// Quand on change la méthode de résolution, on remet l'affichage de base.
+		//Récupère les données des options d'affichage avant modification.
+		boolean base = false;
+		boolean sousRes = false;
+		int commod = this.commoditeAffichee;
+		// Si on a déjà modifié l'affichage
 		if (this.selectedMethod != null) {
-			//affiche uniquement le réseau de base
-			afficherReseauBase();
+			//récupère les valeurs
+			base = this.reseauBaseAffiche;
+			sousRes = this.sousReseauAffiche;
+			// Supprime tout ce qui était affiché
+			cacherReseauBase();
 			cacherReseauSelectionne();
 			if (this.fenetreInfosCommodity!=null) {
 				afficheCommodity(0, this.fenetreInfosCommodity);
-				//remet les controles comme il faut (réseau base activé, sous réseau désactivé et commodité sur 0)
-				this.fenetreInfosCommodity.getHaut().resetControls();
 			}
 		}
+		//Change la méthode sélectionnée
 		this.selectedMethod = methode;
+		//Réaffiche en fonction des paramètres qui étaient sélectionnés
+		if (base) {
+			afficherReseauBase();
+		}
+		if (sousRes) {
+			afficherReseauSelectionne();
+		}
+		if (this.fenetreInfosCommodity!=null) {
+			afficheCommodity(commod, this.fenetreInfosCommodity);
+		}
 	}
 	
 	/**

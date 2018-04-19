@@ -160,4 +160,13 @@ public class FenetrePrincipale extends JFrame {
 	public void finChargement() {
 		progressBar.dispose();
 	}
+	
+	/**
+	 * Recrée une barre de menu pour prendre en compte les changements notamment lors de l'ajout d'une nouvelle méthode de résolution.
+	 */
+	public void reconstruireMenuBar() {	
+		this.menu = new menuBar(this);
+		setJMenuBar(this.menu);
+		revalidate();
+	}
 }

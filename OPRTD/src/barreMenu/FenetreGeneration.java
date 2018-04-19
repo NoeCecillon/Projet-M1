@@ -38,27 +38,30 @@ public class FenetreGeneration {
         JTextField textCommodite = new JTextField();
         
         //Crée une icône avec l'image "infos" et la redimensionne
-        ImageIcon helpIcon = new ImageIcon("src"+System.getProperty("file.separator")+"img"+System.getProperty("file.separator")+"help2.png");
+        ImageIcon helpIcon = new ImageIcon("src"+System.getProperty("file.separator")+"img"+System.getProperty("file.separator")+"infos.png");
         Image img = helpIcon.getImage(); 
-        Image newimg = img.getScaledInstance(10, 10,  java.awt.Image.SCALE_SMOOTH);  
+        Image newimg = img.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH);  
         helpIcon = new ImageIcon(newimg);
         
         /* Crée les labels avec le texte, l'icône et un texte pour donner des infos. */
         JLabel Nodes = new JLabel("Nodes:");
         Nodes.setIcon(helpIcon);
         //Ajoute un texte d'explication 
-        Nodes.setToolTipText("<html>Nombre de noeuds à générer. <br/>Doit être un entier > 7.</html>");
+        Nodes.setToolTipText("<html>Nombre de noeuds à générer. <br/>Doit être un entier > 8.</html>");
 
         JLabel Density = new JLabel("Density:");
         Density.setIcon(helpIcon);
+        Density.setToolTipText("<html>Densité du graphe à générer. <br/>Doit être une valeur comprise entre 0 et 1.</html>");
         
         JLabel Alpha = new JLabel("Alpha:");
         Alpha.setIcon(helpIcon);
+        Alpha.setToolTipText("<html>Angle alpha .....</html>");
         
         JLabel Commodities = new JLabel("Commodities:");
-        Commodities.setIcon(helpIcon);       
+        Commodities.setIcon(helpIcon); 
+        Commodities.setToolTipText("<html>Nombre de commodités à générer. Une commodité représente un transport à effectuer dans le réseau que l'on génère.<br/>Doit être un entier > 8.</html>");
         
-        /* Ajoute tous les panels dans le panel qui va être affiché */
+        /* Ajoute tous les labels dans le panel qui va être affiché */
         JPanel panel = new JPanel(new GridLayout(0, 1));
         panel.add(Nodes);
         panel.add(textNoeuds);
