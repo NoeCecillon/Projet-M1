@@ -7,11 +7,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import affichageCentral.Instance;
 
@@ -27,6 +29,8 @@ public class FenetreInfosHaut extends JPanel {
 	private JButton zoomIn;
 	private JButton zoomOut;
 	private JComboBox choixMethode;
+	private JRadioButton affichageClassique;
+	private JRadioButton affichageReduit;
 	
 	public Box box;
 	
@@ -62,11 +66,44 @@ public class FenetreInfosHaut extends JPanel {
 		});
 		box.add(Hbox);
 		
+		/* Ajout des radio buttons pour sélectionner le mode d'affichage des noeuds */
+		// On met les boutons dans un groupe pour qu'un seul bouton puisse être sélectionné à la fois
+		ButtonGroup group = new ButtonGroup();
+		affichageClassique = new JRadioButton("Classique");
+		affichageReduit = new JRadioButton("Réduit");
+		group.add(affichageClassique);
+		group.add(affichageReduit);
+		//De base c'est l'affichage classique qui est sélectionné
+		affichageClassique.setSelected(true);
+		JLabel textChoixAffichage = new JLabel("Mode d'affichage ");
+		// on met les 3 éléments dans une HBox pour qu'ils soient sur une seule ligne
+		Box HboxAffNoeuds = Box.createHorizontalBox();
+		HboxAffNoeuds.add(textChoixAffichage);
+		HboxAffNoeuds.add(affichageClassique);
+		HboxAffNoeuds.add(affichageReduit);
+		
+		//Event clic sur affichage reduit
+		affichageReduit.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				//Si on sélectionne affichage réduit 
+			    if (e.getStateChange() == ItemEvent.SELECTED) {
+			    	instance.setAffichageReduit();
+			    }
+			    //Si on déselctionne l'affichage réduit (donc on sélectionne l'affichage classique)
+			    else if (e.getStateChange() == ItemEvent.DESELECTED) {
+			        instance.setAffichageClassique();
+			    }
+			}
+		});
+		// Ajout dans le conteneur principal
+		box.add(HboxAffNoeuds);
+		
 		/* Crée la combobox permettant de choisir les résultats de quelle méthode on veut afficher. 
 		 * */		
 		choixMethode = new JComboBox();
 		//on récupère le nom des méthodes dans le dossier methods
-		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
+		String [] fichiers = new File("methods").list(); 
 		for (String nomMethode : fichiers){
 			String nom = nomMethode.replace(".jl", "");
 		}
@@ -143,6 +180,8 @@ public class FenetreInfosHaut extends JPanel {
 		this.zoomIn.setEnabled(true);
 		this.zoomOut.setEnabled(true);
 		this.choixMethode.setEnabled(true);
+		this.affichageClassique.setEnabled(true);
+		this.affichageReduit.setEnabled(true);
 	}
 	
 	/* Désactive les controles */
@@ -153,6 +192,8 @@ public class FenetreInfosHaut extends JPanel {
 		this.zoomIn.setEnabled(false);
 		this.zoomOut.setEnabled(false);
 		this.choixMethode.setEnabled(false);
+		this.affichageClassique.setEnabled(false);
+		this.affichageReduit.setEnabled(false);
 	}
 	
 	/* Remet les boutons comme ils sont à l'ouverture de l'application */
@@ -160,6 +201,8 @@ public class FenetreInfosHaut extends JPanel {
 		this.cbReseau.setSelected(true);
 		this.cbSelect.setSelected(false);
 		this.choixCommodite.setSelectedIndex(0);
+		this.affichageClassique.setSelected(true);
+		this.affichageReduit.setSelected(false);
 	}
 	
 	/* Permet d'ajouter un item dans la combobox des méthodes */

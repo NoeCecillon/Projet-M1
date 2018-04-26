@@ -2,14 +2,21 @@ package barreMenu;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -25,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
 
+import aide.FenetreAide;
 import main.FenetrePrincipale;
 
 public class menuBar extends JMenuBar {
@@ -39,7 +47,17 @@ public class menuBar extends JMenuBar {
 		add(menuMethode);
 		JMenu menuAide = new JMenu("Help");
 		add(menuAide);
-				
+		// Ajout de l'action pour le clic sur l'onglet "aide"
+		JMenuItem itemAide = new JMenuItem("Aide");
+		itemAide.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {	
+				//Ouvre le fenêtre d'aide
+				new FenetreAide();
+			}
+		});
+		menuAide.add(itemAide);
+			
 		JMenu mnOuvrir = new JMenu("Open");
 		menuInstance.add(mnOuvrir);
 		
@@ -150,8 +168,9 @@ public class menuBar extends JMenuBar {
 		
 		/* Crée les items pour les méthodes dans le menu correspondant.
 		 * On récupère le nom de chaque fichier méthode dans le dossier methods et on l'affiche comme texte de l'item.
-		 */		
-		String [] fichiers = new File("src"+System.getProperty("file.separator")+"methods").list(); 
+		 */	
+		//Récupère le chemin vers le package methods contenant les méthodes
+		String [] fichiers = new File("methods").list(); 
 		for (String nomMethode : fichiers){
 			String nom = nomMethode.replace(".jl", "");
 			JMenuItem nouvelItem = new JMenuItem(nom);
@@ -159,7 +178,7 @@ public class menuBar extends JMenuBar {
 			nouvelItem.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseReleased(MouseEvent arg0) {
-					parent.resoudre("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+nomMethode);
+					parent.resoudre("methods"+System.getProperty("file.separator")+nomMethode);
 					// Ajoute la méthode dans les listes sur les fenetres infos à droite
 					String nomM = nom;
 					parent.getFenetreInfos().getHaut().addMethode(nomM);
@@ -187,7 +206,7 @@ public class menuBar extends JMenuBar {
 						//Pour copier le fichier on doit utiliser des Path contenant l'adresse des dossiers source et destination.
 						Path src = choix.getSelectedFile().toPath();
 						//La destination doit être le nouveau chemin vers le fichier
-						Path dest = new File("src"+System.getProperty("file.separator")+"methods"+System.getProperty("file.separator")+choix.getSelectedFile().getName()).toPath();
+						Path dest = new File("methods"+System.getProperty("file.separator")+choix.getSelectedFile().getName()).toPath();
 						try {
 							Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
 							//On recrée la menuBar pour ajouter la nouvelle méthode de résolution.

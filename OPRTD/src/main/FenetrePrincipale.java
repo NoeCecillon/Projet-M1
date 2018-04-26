@@ -36,7 +36,8 @@ public class FenetrePrincipale extends JFrame {
 	/* Création de la fenêtre. */
 	public FenetrePrincipale() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 800, 800);
+		setLocationRelativeTo(null);
 		
 		/* Barre de menus. */
 		this.menu = new menuBar(this);

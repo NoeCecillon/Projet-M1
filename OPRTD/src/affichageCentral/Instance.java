@@ -15,6 +15,7 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 import infos.FenetreInfos;
@@ -804,4 +805,37 @@ public class Instance extends mxGraph {
 		return this.commodites;
 	}
 	
+	/**
+	 * Modifie l'affichage des noeuds pour afficher les noeuds contenants le numéro du noeud.
+	 */
+	public void setAffichageClassique() {
+		//Parcours de tous les noeuds
+				Iterator<HashMap.Entry<Integer, Noeud>> itr2 = noeuds.entrySet().iterator();
+		    	while(itr2.hasNext()) {
+		    		HashMap.Entry<Integer, Noeud> entry = itr2.next();
+		    		//appel à la méthode pour remettre la taille des noeuds comme ils étaient de base
+		    		adapterTailleGraphe();
+		    		/* On remet le label en récupérant la valeur qui est la clé par laquelle le noeud est indéxé dans la hashmap noeuds
+		    		 */
+		    		getModel().setValue(entry.getValue().node, entry.getKey());
+		    		refresh();
+		    	}
+	}
+	
+	/**
+	 * Modifie l'affichage des noeuds pour n'afficher que des petits points.
+	 */
+	public void setAffichageReduit() {
+		//Parcours de tous les noeuds
+		Iterator<HashMap.Entry<Integer, Noeud>> itr2 = noeuds.entrySet().iterator();
+    	while(itr2.hasNext()) {
+    		HashMap.Entry<Integer, Noeud> entry = itr2.next();
+    		//Réduit la taille du noeud
+    		entry.getValue().node.getGeometry().setWidth(5);
+    		entry.getValue().node.getGeometry().setHeight(5);
+    		//Supprime le label affiché
+    		getModel().setValue(entry.getValue().node, "");
+    		refresh();
+    	}
+	}	
 }
