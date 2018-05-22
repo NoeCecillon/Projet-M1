@@ -1,37 +1,21 @@
 package barreMenu;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.SwingConstants;
-
 import aide.FenetreAide;
 import main.FenetrePrincipale;
 
@@ -61,12 +45,12 @@ public class menuBar extends JMenuBar {
 		JMenu mnOuvrir = new JMenu("Open");
 		menuInstance.add(mnOuvrir);
 		
-		/* Item permettant d'ouvrir une instance random. Ouvre un navigateur permettant de sélectionner le dossier contenant l'instance random. */
+		/* Item permettant d'ouvrir une instance réelle. Ouvre un navigateur permettant de sélectionner le dossier contenant l'instance réelle. */
 		JMenuItem itemOpenReal = new JMenuItem("Real");
 		itemOpenReal.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				JFileChooser choix = new JFileChooser();
+				CustomFileChooser choix = new CustomFileChooser("ouvertureInstance");
 				choix.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				/* On sélectionne un dossier et pas un fichier */
 				int retour=choix.showOpenDialog(parent.getContentPane());
@@ -110,7 +94,7 @@ public class menuBar extends JMenuBar {
 		itemOpenRandom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				JFileChooser choix = new JFileChooser();
+				CustomFileChooser choix = new CustomFileChooser("ouvertureInstance");
 				choix.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				/* On sélectionne un dossier et pas un fichier */
 				int retour=choix.showOpenDialog(parent.getContentPane());
@@ -194,11 +178,10 @@ public class menuBar extends JMenuBar {
 		ajouterMethode.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				//Texte d'aide qui sera affiché dans le fileChooser. String générée avec https://codebeautify.org/java-escape-unescape pour transformer un texte normal en un texte utilisable dans une String.
-				String texteAide = "Pour ajouter une nouvelle méthode de résolution, sélectionnez le fichier contenant la méthode.\nLe fichier doit être au format .jl et son nom doit être celui que vous voulez utiliser comme nom de la méthode.\nPour pouvoir être utilisé, le fichier doit respecter les conditions suivantes :\n\t- En début de fichier, juste après les \"using XXX\", il faut ajouter la ligne suivante \"File=string(ARGS[1])\".\n\t- Les chemins vers les fichiers fichier_1.csv, fichier_2.csv et fichier_3.csv doivent être remplacés par \'File*\"fichier_3.csv\"\'.\n\t- Le sous réseau sélectionné doit être affiché en commençant par \"subgraph :\" puis avec tous les arcs sous la forme  (27,20)   (57,27)   (58,57)   (64,50) ...\n\t- Le résultat des commodités doit être affiché en commençant par \"commodity X :\" ou X est le numéro de la commodité et suivi des sommets utilisés par cette commodité sous la forme commodity 1 :    (77,79)   (79,111)   (80,77) ...\n\t- La ligne suivant doit contenir la longueur de la commodité sous la forme \"length : 3203.966569\"";
-				//Ouvre le sélecteur de fichier contenant un bouton aide. On donne le texte d'aide au constructeur.
-				CustomFileChooser choix = new CustomFileChooser(texteAide);
-				int retour = choix.showOpenDialog(parent.getContentPane());
+		
+				//Ouvre le sélecteur de fichier contenant un bouton aide. On donne le nom de l'ancre vers laquelle on veut rediriger l'utilisateur si il demande de l'aide.
+				CustomFileChooser choix = new CustomFileChooser("ajoutMethode");
+				int retour = choix.showOpenDialog(null);
 				//Si l'utilisateur a sélectionné un fichier
 				if(retour==JFileChooser.APPROVE_OPTION){
 					//Vérifie que c'est bien un fichier .jl
@@ -225,7 +208,7 @@ public class menuBar extends JMenuBar {
 	
 	public void sauverInstance() {
 		try {
-			JFileChooser choix = new JFileChooser();
+			CustomFileChooser choix = new CustomFileChooser("sauvegardeInstance");
 			choix.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			/* On sélectionne un dossier et pas un fichier */
 			int retour=choix.showOpenDialog(parent.getContentPane());

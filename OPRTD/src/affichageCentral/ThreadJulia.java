@@ -1,5 +1,7 @@
 package affichageCentral;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -35,12 +37,23 @@ public class ThreadJulia extends Thread {
     	Runtime runtime = Runtime.getRuntime();
 		Process proc;
 		try {
+			//Lit le fichier de configuration pour récupérer le chemin de Julia.
+			BufferedReader br = new BufferedReader(new FileReader("config.txt"));
+			String ligne;
+			String pathJulia = null;
+			while ((ligne = br.readLine()) != null) {
+				if (ligne.startsWith("Julia: ")) {
+					//Cette variable contient le chemin vers Julia 
+					pathJulia = ligne.replace("Julia: ", "");
+				}
+			}
+			
 			//éxécute une commande dans le terminal pour lancer la résolution par Julia.
 			//1er param = Chemin vers Julia
 			//2ème param = permet de ne pas afficher les warnings
 			//3ème param = Chemin vers la méthode de résolution
 			//4ème param = Chemin vers le dossier contenant l'instance avec un "\" ou "/" à la fin.
-			proc = runtime.exec(new String[] { "C:\\Users\\Jean\\AppData\\Local\\Julia-0.5.2\\bin\\julia.exe", "--depwarn=no" , cheminMethode , path+System.getProperty("file.separator")} );
+			proc = runtime.exec(new String[] { pathJulia, "--depwarn=no" , cheminMethode , path+System.getProperty("file.separator")} );
 			/* Récupère ce qui est écrit dans la console de Julia */
 			AfficheurFluxJulia fluxSortie = new AfficheurFluxJulia(proc.getInputStream());
             AfficheurFluxJulia fluxErreur = new AfficheurFluxJulia(proc.getErrorStream());

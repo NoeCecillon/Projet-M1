@@ -2,8 +2,10 @@ package aide;
 
 import java.awt.GridBagLayout;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
 /**
@@ -67,7 +69,7 @@ public class FenetreAide extends JFrame {
 		setVisible(true);
 		//Pour fermer cette fenêtre mais pas l'application entière
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(0, 0, 600, 600);
+		setBounds(0, 0, 1000, 700);
 		//pour placer la fenêtre au milieu de l'écran
 		setLocationRelativeTo(null);
 		
@@ -80,7 +82,14 @@ public class FenetreAide extends JFrame {
 		ongAide = new OngletAide();
 		tabbedPane.addTab("Aide", ongAide);
 		add(tabbedPane);
+		//toFront();
 		revalidate();
+		toFront();
+		//this.requestFocus();
+		
+		repaint();
+		
+		
 	}
 	
 }

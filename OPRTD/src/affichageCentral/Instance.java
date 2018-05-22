@@ -698,6 +698,7 @@ public class Instance extends mxGraph {
 	 */
 	public void adapterTailleGraphe() {
 		/* Modifie la taille des noeuds en fonction du nombre de noeuds */
+		//Si il y a plus de 100 noeuds
 		if (noeuds.size() > 100) {
 			Iterator<HashMap.Entry<Integer, Noeud>> itr = noeuds.entrySet().iterator();
 	    	while(itr.hasNext()) {
@@ -708,6 +709,7 @@ public class Instance extends mxGraph {
 	    		entry.getValue().node.getGeometry().setHeight(15);
 	    	}
 		}
+		// Si il y en a en 66 et 100
 		else if (noeuds.size() > 65) {
 			Iterator<HashMap.Entry<Integer, Noeud>> itr = noeuds.entrySet().iterator();
 	    	while(itr.hasNext()) {
@@ -717,6 +719,7 @@ public class Instance extends mxGraph {
 	    		entry.getValue().node.getGeometry().setHeight(15);
 	    	}
 		}
+		//Si il y en a entre 31 et 65
 		else if (noeuds.size() > 30) {
 			Iterator<HashMap.Entry<Integer, Noeud>> itr = noeuds.entrySet().iterator();
 	    	while(itr.hasNext()) {
@@ -724,6 +727,16 @@ public class Instance extends mxGraph {
 	    		//Modifie la taille des noeuds pour mieux voir.
 	    		entry.getValue().node.getGeometry().setWidth(20);
 	    		entry.getValue().node.getGeometry().setHeight(20);
+	    	}
+		}
+		//Si il y en a moins de 30
+		else {
+			Iterator<HashMap.Entry<Integer, Noeud>> itr = noeuds.entrySet().iterator();
+	    	while(itr.hasNext()) {
+	    		HashMap.Entry<Integer, Noeud> entry = itr.next();
+	    		//Modifie la taille des noeuds pour mieux voir.
+	    		entry.getValue().node.getGeometry().setWidth(25);
+	    		entry.getValue().node.getGeometry().setHeight(25);
 	    	}
 		}
 	}

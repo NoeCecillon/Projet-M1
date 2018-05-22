@@ -91,8 +91,6 @@ public class FenetreGeneration {
         	} else {
         		FenetreConsole.getFenetreConsole().printConsole("Invalid value.");
         	}
-        } else {
-            System.out.println("Cancelled");
         }
 	}
 	

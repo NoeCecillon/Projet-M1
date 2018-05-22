@@ -1,35 +1,44 @@
 package barreMenu;
 
 import java.awt.Component;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import aide.FenetreAide;
 
 /**
  * FileChooser légèrement modifié pour ajouter 1 bouton "Aide".
  * Utilisé par menuBar quand on veut ajouter une nouvelle méthode.
  */
-class CustomFileChooser extends JFileChooser{
+public class CustomFileChooser extends JFileChooser{
+	
+	/* Bouton "Annuler" permettant de fermer la fenêtre de sélection */
+	JButton boutonAnnuler;
 	
 	/**
 	 * Construit un FileChooser avec un bouton aide en plus.
-	 * @param texteAide Le texte qui sera affiché au clic sur le bouton aide.
+	 * @param ancre L'ancre vers laquelle on sera redirigé lors de l'ouverture de la fenêtre d'aide.
 	 */
-    public CustomFileChooser(String texteAide) {
+    public CustomFileChooser(String ancre) {
         JButton boutonAide = new JButton("Aide");
         //Action au clic sur le bouton d'aide
         boutonAide.addActionListener(new ActionListener() { 
         	  public void actionPerformed(ActionEvent e) { 
-        		  //Affiche le texte d'aide.
-        		  JOptionPane.showMessageDialog(null, texteAide);
+        		  //On ferme la fenêtre de sélection car elle est modale donc on ne peut pas afficher la fenêtre d'aide par dessus.
+        		  fermer();
+        		  //On ouvre la fenêtre d'aide en positionnant la vue sur l'ancre donnée en paramètre
+        		  new FenetreAide("Aide", ancre);
+        		  
         	  } 
         });
-
         JPanel panel1 = (JPanel)this.getComponent(3);
         JPanel panel2 = (JPanel) panel1.getComponent(3);
 
@@ -41,6 +50,14 @@ class CustomFileChooser extends JFileChooser{
         panel2.add(boutonAide);
         panel2.add(c1);
         panel2.add(c2);
-
+        //Garde une référence sur le bouton "Annuler"
+        boutonAnnuler = (JButton) c2;
    }
+    
+    /**
+     * Méthode permettant de simuler un clic sur le bouton annuler pour fermer ce JFileChooser.
+     */
+    public void fermer() {
+    	this.boutonAnnuler.doClick();
+    }
 }

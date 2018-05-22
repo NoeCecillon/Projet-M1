@@ -1,8 +1,15 @@
 package main;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -13,6 +20,7 @@ import javax.swing.border.TitledBorder;
 import affichageCentral.PanelCentre;
 import affichageCentral.affichageRandom;
 import affichageCentral.affichageReel;
+import barreMenu.CustomFileChooser;
 import barreMenu.FenetreGeneration;
 import barreMenu.menuBar;
 import infos.FenetreInfos;
@@ -29,6 +37,31 @@ public class FenetrePrincipale extends JFrame {
 	
 	/* Lancement de l'application. */
 	public static void main(String[] args) {
+		// On commence par vérifier si le fichier de configuration existe 
+		File f = new File("config.txt");
+		if(!f.isFile()) { 
+			//Si le fichier n'existe pas, on ouvre une fenetre pour sélectionner l'éxécutable Julia à utiliser
+			CustomFileChooser execJulia = new CustomFileChooser("selectionExecutable");
+			execJulia.setDialogTitle("Sélectionnez l'éxécutable de Julia à utiliser");
+			int retour= execJulia.showOpenDialog(null);
+			//Si un fichier a été choisi
+			if(retour==JFileChooser.APPROVE_OPTION) {
+				PrintWriter writer = null;
+				try {
+					//Crée le fichier config.txt et écrit l'adresse de l'éxécutable pour le réutiliser pour les prochaines fois
+					writer = new PrintWriter("config.txt", "UTF-8");
+					writer.println("Julia: "+ execJulia.getSelectedFile().getAbsolutePath());
+					writer.close();
+				} catch (FileNotFoundException | UnsupportedEncodingException e) {
+					System.exit(0);
+					e.printStackTrace();
+				}	
+			} else {
+				// Si aucun fichier n'a été sélectionné on ferme l'application
+				System.exit(0);
+			}
+			//Si le fichier existait déjà, on ne fait rien de plus et on lance simplement l'application
+		}
 		FenetrePrincipale frame = new FenetrePrincipale();
 		frame.setVisible(true);	
 	}
@@ -38,7 +71,8 @@ public class FenetrePrincipale extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 800);
 		setLocationRelativeTo(null);
-		
+		this.setIconImage(new ImageIcon("logo_dangerzone.png").getImage());
+		this.setTitle("DangerZone");
 		/* Barre de menus. */
 		this.menu = new menuBar(this);
 		setJMenuBar(this.menu);
